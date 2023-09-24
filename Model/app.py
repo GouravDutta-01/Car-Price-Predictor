@@ -1,23 +1,24 @@
 from flask import Flask, request, jsonify
 import pandas as pd
 import pickle
-from flask_cors import CORS
-
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, supports_credentials=True)
 
 model = pickle.load(open('model/model.pkl', 'rb'))
 
 
 @app.route('/')
 def home():
-    return 'API is Running'
+    return jsonify({'Message': 'API is Running'})
 
 
 @app.route('/predict', methods=['POST'])
+@cross_origin(origin='http://localhost:3000', methods=['POST'],
+              allow_headers=['Content-Type'])
 def predict():
     try:
         data = request.get_json()
