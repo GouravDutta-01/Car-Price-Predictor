@@ -22,7 +22,7 @@ def home():
 def predict():
     try:
         data = request.get_json()
-        query_df = pd.DataFrame(data)
+        query_df = pd.DataFrame([data])
         prediction = model.predict(query_df)
         return jsonify({'Prediction': list(prediction)})
     except Exception as e:
