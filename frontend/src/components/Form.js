@@ -1,72 +1,60 @@
 import React, { useState } from "react";
 
-const Form = (props) => {
-    // let {mode} = props;
+const Form = () => {
+  // State to manage loading state
   const [isLoading, setIsloading] = useState(false);
+  // State to manage form data
   const [formData, setFormData] = useState({
-    Year:'', 
-    Present_Price:'',
-    Kms_Driven:'',
-    Fuel_Type:'',
-    Seller_Type:'', 
-    Transmission:'', 
-    Owner:''
-});
-const [result, setResult] = useState("");
+    Year: "",
+    Present_Price: "",
+    Kms_Driven: "",
+    Fuel_Type: "",
+    Seller_Type: "",
+    Transmission: "",
+    Owner: "",
+  });
+  // State to manage prediction result
+  const [result, setResult] = useState("");
+  // State to manage displaying result
+  const [showSpan, setShowSpan] = useState(false);
 
-
-const handleChange = (event) => {
+  const handleChange = (event) => {
     const value = event.target.value;
     const name = event.target.name;
-    let inputData = {...formData};
-    inputData[name]=value;
+    let inputData = { ...formData };
+    inputData[name] = value;
     setFormData(inputData);
-    // console.log(inputData)
-}
+  };
 
-const handlePredictClick = () => {
-    const url = "http://localhost:5001/predict";
+  // Function to handle the 'Predict Selling Price' button click
+  const handlePredictClick = () => {
+    const url = "http://localhost:5000/predict";
     setIsloading(true);
-    fetch(url,
-    {
-        headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-        },
-        method: 'POST',
-        body: JSON.stringify(formData)
-    })  
-    .then(response => response.json())
-    .then(response => {
+    const jsonData = JSON.stringify(formData);
+    // Fetch request to the Flask backend
+    fetch(url, {
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: jsonData,
+    })
+      .then((response) => response.json())
+      .then((response) => {
         setResult(response.Prediction);
         setIsloading(false);
-    });
-}
-
-// const handleCancelClick = (event) => {
-//     setResult("");
-// }
+        setShowSpan(true);
+      });
+  };
 
   return (
     <>
-      <div className="container text-center">
-        <h1
-          className="text-center mb-4"
-          style={{
-            margin: "35px 0px",
-            marginTop: "90px",
-            color: props.mode === "dark" ? "white" : "black",
-          }}
-        >
-          Car Price Predictor
-        </h1>
-        <div className="container" style={{
-            margin: "35px 0px",
-            marginTop: "90px",
-            color: props.mode === "dark" ? "white" : "black",
-          }}>
-          <form method="post" accept-charset="utf-8" name="Modelform">
-            <div className="text-center mb-3">
+      <div className="container text-center mt-4">
+        <h1 className="text-center">Car Price Prediction</h1>
+        <div className="container">
+          <form method="post" acceptCharset="utf-8" name="Modelform">
+            <div className="text-center mt-3">
               <label>
                 <b>Enter Year of Purchase:</b>
               </label>
@@ -124,8 +112,11 @@ const handlePredictClick = () => {
                 name="Fuel_Type"
                 value={formData.Fuel_Type}
                 onChange={handleChange}
-                required="1"
+                required
               >
+                <option value="" disabled>
+                  Select
+                </option>
                 <option value="0">Petrol</option>
                 <option value="1">Diesel</option>
                 <option value="2">CNG</option>
@@ -142,8 +133,11 @@ const handlePredictClick = () => {
                 name="Seller_Type"
                 value={formData.Seller_Type}
                 onChange={handleChange}
-                required="1"
+                required
               >
+                <option value="" disabled>
+                  Select
+                </option>
                 <option value="0">Dealer</option>
                 <option value="1">Individual</option>
               </select>
@@ -159,8 +153,11 @@ const handlePredictClick = () => {
                 name="Transmission"
                 value={formData.Transmission}
                 onChange={handleChange}
-                required="1"
+                required
               >
+                <option value="" disabled>
+                  Select
+                </option>
                 <option value="0">Manual</option>
                 <option value="1">Automatic</option>
               </select>
@@ -193,7 +190,15 @@ const handlePredictClick = () => {
           <br />
           <div className="text-center">
             <h4>
-              <span id="prediction">{result}</span>
+              {showSpan && (
+                <span id="prediction">
+                  {result && Object.keys(result).length !== 0 ? (
+                    <p>The Predicted Price is {result} Lakhs</p>
+                  ) : (
+                    <p>Please fill out each field in the form completely</p>
+                  )}
+                </span>
+              )}
             </h4>
           </div>
         </div>
